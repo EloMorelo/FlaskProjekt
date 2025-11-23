@@ -1,0 +1,57 @@
+---
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install XFCE and remote access packages
+  apt:
+    name:
+      - xfce4
+      - xfce4-goodies
+      - xorg
+      - xinit
+      - dbus-x11
+      - x11-xserver-utils
+      - xrdp
+    state: present
+    install_recommends: no
+
+- name: Create xrdp start script to launch XFCE
+  copy:
+    dest: /etc/xrdp/startwm.sh
+    content: |
+      #!/bin/sh
+      unset DBUS_SESSION_BUS_ADDRESS
+      unset XDG_RUNTIME_DIR
+      if [ -r /etc/profile ]; then
+        . /etc/profile
+      fi
+      exec startxfce4
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Ensure xrdp service is enabled and started
+  systemd:
+    name: xrdp
+    enabled: yes
+    state: restarted
+
+- name: Allow RDP through UFW (if ufw present)
+  ufw:
+    rule: allow
+    name: 'OpenSSH'   # keep SSH allowed if present
+  when: false
+
+- name: Install lightdm
+  apt:
+    name: lightdm
+    state: present
+
+- name: Enable and start lightdm
+  systemd:
+    name: lightdm
+    enabled: yes
+    state: started

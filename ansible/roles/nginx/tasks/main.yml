@@ -1,0 +1,14 @@
+---
+- name: Install required system packages
+  become: true
+  package:
+    name:
+      - nginx
+    state: present
+
+- name: Ensure nginx is enabled and started
+  become: true
+  service:
+    name: nginx
+    enabled: true
+    state: started

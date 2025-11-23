@@ -1,0 +1,4 @@
+- hosts: client
+  become: yes
+  roles:
+    - install-xfce

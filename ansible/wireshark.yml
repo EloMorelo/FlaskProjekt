@@ -1,0 +1,4 @@
+- hosts: wireshark
+  become: yes
+  roles:
+    - install-xfce

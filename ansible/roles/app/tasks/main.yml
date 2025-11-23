@@ -1,0 +1,19 @@
+---
+- name: Install required system packages
+  become: true
+  package:
+    name:
+      - python3
+      - python3-pip
+      - python3-venv
+    state: present
+
+- name: Install Flask and Gunicorn using pip3
+  become: true
+  pip:
+    name:
+      - flask
+      - gunicorn
+    executable: pip3
+    state: present
+

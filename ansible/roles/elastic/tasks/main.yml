@@ -1,0 +1,38 @@
+---
+
+- name: install elasticsearch prerequisites
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+    update_cache: yes
+    state: present
+
+- name: add Elasticsearch GPG key
+  ansible.builtin.apt_key:
+    url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
+
+- name: add Elasticsearch apt repository
+  ansible.builtin.apt_repository:
+    repo: 'deb https://artifacts.elastic.co/packages/8.x/apt stable main'
+    state: present
+    filename: 'elastic-8.x'
+
+- name: update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: install elasticsearch
+  apt:
+    name: elasticsearch
+    state: latest
+
+- name: enable and start elasticsearch service
+  systemd:
+    name: elasticsearch
+    enabled: true
+    state: started
