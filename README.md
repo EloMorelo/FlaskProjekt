@@ -45,3 +45,5 @@ Provisioning konkretnej maszyny:
 vagrant provision NAZWA_MASZYNY
 ```
 gdzie NAZWA_MASZYNY to nazwa konkretnej maszyny.
+
+Prezentacja: https://m365ht-my.sharepoint.com/:p:/r/personal/wrx81748_student_wroclaw_merito_pl/Documents/Analiza%20log%C3%B3w.pptx?d=w423a616329a64be3aa22648ccf0d3862&csf=1&web=1&e=AZrIVe
