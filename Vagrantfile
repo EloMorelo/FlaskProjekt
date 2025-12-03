@@ -1,93 +1,95 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
-
-# Uruchamianie (konsola w trybie administratora): vagrant up --provider=hyperv
-
 Vagrant.configure("2") do |config|
   config.vm.box = "assurea/ubuntu-24-04"
   config.vm.box_version = "1.2"
+  config.ssh.insert_key = false
+  config.vm.boot_timeout = 600
 
-  # elasticsearch vm
-  config.vm.define "elasticsearch" do |elasticsearch|
-    elasticsearch.vm.provider "hyperv" do |h|
-      h.vm_integration_services = {
-        guest_service_interface: true,
-        CustomVMSRV: true
-      }
-      h.cpus = 2
-      h.maxmemory = 4096
-      h.vmname = "elasticsearch"
-    end
-    elasticsearch.vm.network "private_network", ip: "192.168.200.10", bridge: "LabInternal"
-    elasticsearch.vm.synced_folder ".", "/vagrant", disabled: true
-
-    elasticsearch.vm.provision "ansible" do |ansible|
-      ansible.playbook = "ansible/elk.yml"
-    end
+  def base_python_provision(vm)
+    vm.vm.provision "shell", inline: <<-SHELL
+      apt update -y
+      apt install -y python3 python3-pip sshpass
+    SHELL
   end
 
-  # application vm
+  config.vm.define "db" do |db|
+    db.vm.box = "assurea/ubuntu-24-04"
+    db.vm.network "private_network", ip: "192.168.200.10"
+    db.vm.provider "libvirt" do |h|
+      h.memory = 1024
+      h.cpus = 1
+      h.name = "db"
+    end
+
+    db.vm.provision "shell", inline: <<-SHELL
+      sudo apt-get update
+      sudo apt-get install -y postgresql postgresql-contrib
+      sudo -u postgres psql -c "CREATE USER vagrant WITH PASSWORD 'vagrant';"
+      sudo -u postgres psql -c "CREATE DATABASE flaskdb OWNER vagrant;"
+      sudo sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/g" /etc/postgresql/*/main/postgresql.conf
+      echo "host all all 0.0.0.0/0 md5" | sudo tee -a /etc/postgresql/*/main/pg_hba.conf
+      sudo systemctl restart postgresql
+    SHELL
+  end
+
+  config.vm.define "elasticsearch" do |es|
+    es.vm.network "private_network", ip: "192.168.200.11"
+    es.vm.provider "libvirt" do |h|
+      h.name = "elasticsearch"
+      h.cpus = 2
+      h.memory = 1024
+    end
+
+    es.vm.provision "shell", inline: <<-SHELL
+      wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+      sudo apt install -y apt-transport-https
+      echo "deb https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-8.x.list
+      sudo apt update
+      sudo apt install -y elasticsearch kibana
+      sudo systemctl enable elasticsearch --now
+      sudo systemctl enable kibana --now
+    SHELL
+  end
+
   config.vm.define "app" do |app|
-    app.vm.provider "hyperv" do |h|
-      h.vm_integration_services = {
-        guest_service_interface: true,
-        CustomVMSRV: true
-      }
+    app.vm.network "private_network", ip: "192.168.200.12"
+    app.vm.provider "libvirt" do |h|
+      h.name = "app"
       h.cpus = 2
-      h.maxmemory = 3072
-      h.vmname = "app"
+      h.memory = 3072
     end
-    app.vm.network "private_network", ip: "192.168.200.11", bridge: "LabInternal"
-    app.vm.synced_folder ".", "/vagrant", disabled: true
 
-    app.vm.provision "ansible" do |ansible|
-      ansible.playbook = "ansible/app.yml"
-    end
+    app.vm.provision "shell", inline: <<-SHELL
+      sudo apt update -y
+      sudo apt install -y nginx filebeat
+      sudo systemctl enable nginx --now
+
+      sudo filebeat modules enable system nginx
+
+      sudo sed -i 's|#hosts: \["localhost:9200"\]|hosts: ["192.168.200.11:9200"]|' /etc/filebeat/filebeat.yml
+      sudo systemctl enable filebeat --now
+    SHELL
   end
 
-  # client vm
   config.vm.define "client" do |client|
-    client.vm.provider "hyperv" do |h|
-      h.vm_integration_services = {
-        guest_service_interface: true,
-        CustomVMSRV: true
-      }
+    client.vm.network "private_network", ip: "192.168.200.13"
+    client.vm.provider "libvirt" do |h|
+      h.name = "client"
       h.cpus = 1
-      h.maxmemory = 1024
-      h.vmname = "client"
+      h.memory = 1024
     end
-    client.vm.network "private_network", ip: "192.168.200.12", bridge: "LabInternal"
-    client.vm.synced_folder ".", "/vagrant", disabled: true
-
-    client.vm.provision "ansible" do |ansible|
-      ansible.playbook = "ansible/client.yml"
-    end
-end
-
-  # wireshark vm
-  config.vm.define "wireshark" do |wireshark|
-    wireshark.vm.provider "hyperv" do |h|
-      h.vm_integration_services = {
-        guest_service_interface: true,
-        CustomVMSRV: true
-      }
-      h.cpus = 1
-      h.maxmemory = 2048
-      h.vmname = "wireshark"
-    end
-    wireshark.vm.network "private_network", ip: "192.168.200.13", bridge: "LabInternal"
-    wireshark.vm.synced_folder ".", "/vagrant", disabled: true
-
-    wireshark.vm.provision "ansible" do |ansible|
-      ansible.playbook = "ansible/wireshark.yml"
-    end
+    base_python_provision(client)
   end
 
-  # Enable provisioning with a shell script. Additional provisioners such as
-  # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
-  # documentation for more information about their specific syntax and use.
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   apt-get update
-  #   apt-get install -y apache2
-  # SHELL
+  config.vm.define "wireshark" do |ws|
+    ws.vm.network "private_network", ip: "192.168.200.14"
+    ws.vm.provider "libvirt" do |h|
+      h.name = "wireshark"
+      h.cpus = 1
+      h.memory = 2048
+    end
+    base_python_provision(ws)
+    ws.vm.provision "shell", inline: <<-SHELL
+      sudo apt install -y wireshark tcpdump
+    SHELL
+  end
 end
