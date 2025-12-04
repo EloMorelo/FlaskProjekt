@@ -17,7 +17,6 @@ Vagrant.configure("2") do |config|
     db.vm.provider "libvirt" do |h|
       h.memory = 1024
       h.cpus = 1
-      h.name = "db"
     end
 
     db.vm.provision "shell", inline: <<-SHELL
@@ -34,7 +33,6 @@ Vagrant.configure("2") do |config|
   config.vm.define "elasticsearch" do |es|
     es.vm.network "private_network", ip: "192.168.200.11"
     es.vm.provider "libvirt" do |h|
-      h.name = "elasticsearch"
       h.cpus = 2
       h.memory = 1024
     end
@@ -53,7 +51,6 @@ Vagrant.configure("2") do |config|
   config.vm.define "app" do |app|
     app.vm.network "private_network", ip: "192.168.200.12"
     app.vm.provider "libvirt" do |h|
-      h.name = "app"
       h.cpus = 2
       h.memory = 3072
     end
@@ -73,7 +70,6 @@ Vagrant.configure("2") do |config|
   config.vm.define "client" do |client|
     client.vm.network "private_network", ip: "192.168.200.13"
     client.vm.provider "libvirt" do |h|
-      h.name = "client"
       h.cpus = 1
       h.memory = 1024
     end
@@ -83,7 +79,6 @@ Vagrant.configure("2") do |config|
   config.vm.define "wireshark" do |ws|
     ws.vm.network "private_network", ip: "192.168.200.14"
     ws.vm.provider "libvirt" do |h|
-      h.name = "wireshark"
       h.cpus = 1
       h.memory = 2048
     end
