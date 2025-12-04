@@ -3,3 +3,6 @@
   roles:
     - app
     - nginx
+    - role: hostname
+      vars:
+        hostname: app.lab.local

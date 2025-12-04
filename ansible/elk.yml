@@ -2,3 +2,6 @@
   become: yes
   roles:
     - elastic
+    - role: hostname
+      vars:
+        hostname: elasticsearch.lab.local

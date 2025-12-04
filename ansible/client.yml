@@ -2,3 +2,6 @@
   become: yes
   roles:
     - install-xfce
+    - role: hostname
+      vars:
+        hostname: client.lab.local

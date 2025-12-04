@@ -1,5 +1,4 @@
 ---
----
 - name: Update apt cache
   apt:
     update_cache: yes
@@ -8,13 +7,14 @@
 - name: Install XFCE and remote access packages
   apt:
     name:
+      - dbus-x11
+      - spice-vdagent
       - xfce4
       - xfce4-goodies
-      - xorg
       - xinit
-      - dbus-x11
-      - x11-xserver-utils
+      - xorg
       - xrdp
+      - x11-xserver-utils
     state: present
     install_recommends: no
 
@@ -39,19 +39,15 @@
     enabled: yes
     state: restarted
 
+- name: Ensure spice-vdagent service is enabled and started
+  systemd:
+    name: spice-vdagent
+    enabled: yes
+    state: started
+
 - name: Allow RDP through UFW (if ufw present)
   ufw:
     rule: allow
     name: 'OpenSSH'   # keep SSH allowed if present
   when: false
 
-- name: Install lightdm
-  apt:
-    name: lightdm
-    state: present
-
-- name: Enable and start lightdm
-  systemd:
-    name: lightdm
-    enabled: yes
-    state: started

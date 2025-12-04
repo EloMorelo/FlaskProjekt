@@ -5,6 +5,7 @@
     name:
       - nginx
     state: present
+    update_cache: yes
 
 - name: Ensure nginx is enabled and started
   become: true

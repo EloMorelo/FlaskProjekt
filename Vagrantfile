@@ -1,93 +1,187 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# Uruchamianie (konsola w trybie administratora): vagrant up --provider=hyperv
+=begin
+Vagrant environment for the FlaskProjekt lab (libvirt provider).
 
-Vagrant.configure("2") do |config|
-  config.vm.box = "assurea/ubuntu-24-04"
-  config.vm.box_version = "1.2"
+Purpose:
+- Defines four VMs: `elasticsearch`, `app`, `client`, and `wireshark`.
+- Each VM is provisioned via Ansible playbooks located in `ansible/*.yml`.
+
+Quick usage:
+- Start: `vagrant up --provider=libvirt`
+- Re-provision a VM: `vagrant provision <name>`
+- Halt: `vagrant halt`
+- Destroy: `vagrant destroy -f`
+
+Prerequisites:
+- Vagrant (>=2.2 recommended)
+- `vagrant-libvirt` plugin (for libvirt/KVM provider)
+- `vagrant-hostmanager` plugin (optional, used here to manage host entries)
+- `ansible` installed locally or available to Vagrant
+- libvirt/qemu configured on the host
+
+Troubleshooting tips:
+- If libvirt/qemu permission errors occur, add your user to `libvirt` group and relogin:
+  `sudo usermod -aG libvirt $(whoami)`
+- If you prefer session mode, set `h.qemu_use_session = true` in provider blocks.
+- Hostname-to-IP mapping is handled by `vagrant-hostmanager`; check its config if hosts aren't updated.
+
+Notes:
+- VMs use DHCP on the libvirt `default` network. Each VM runs a small shell provisioner to request DHCP and set `/etc/resolv.conf` to `8.8.8.8`.
+- Adjust CPU/memory in the provider blocks for each VM as needed.
+=end
+
+Vagrant.configure("2") do |main_config|
+  main_config.vm.box = "generic/ubuntu2204"
+  main_config.vm.box_version = "4.3.12"
+
+  main_config.hostmanager.ignore_private_ip = false
+  main_config.hostmanager.include_offline = true
+  # main_config.hostmanager.manage_host = false
 
   # elasticsearch vm
-  config.vm.define "elasticsearch" do |elasticsearch|
-    elasticsearch.vm.provider "hyperv" do |h|
-      h.vm_integration_services = {
-        guest_service_interface: true,
-        CustomVMSRV: true
-      }
+  main_config.vm.define "elasticsearch" do |config|
+    config.vm.provider "libvirt" do |h|
       h.cpus = 2
-      h.maxmemory = 4096
-      h.vmname = "elasticsearch"
+      h.memory = 4096
+      h.random_hostname = false
+      h.qemu_use_session = false
+      h.nic_model_type = "virtio"
+      h.nic_adapter_count = 1
+      h.machine_arch = "x86_64"
     end
-    elasticsearch.vm.network "private_network", ip: "192.168.200.10", bridge: "LabInternal"
-    elasticsearch.vm.synced_folder ".", "/vagrant", disabled: true
 
-    elasticsearch.vm.provision "ansible" do |ansible|
+    config.vm.provision :hostmanager
+
+    config.vm.network "private_network",
+      libvirt__network_name: "default",
+      type: "dhcp"
+
+    config.vm.hostname = "elasticsearch.lab.local"
+
+  config.vm.provision "shell" do |sh|
+    sh.inline = <<-EOF
+      sudo dhclient -v || true
+      echo 'nameserver 8.8.8.8' | sudo tee /etc/resolv.conf
+    EOF
+  end
+
+    config.vm.provision "ansible" do |ansible|
       ansible.playbook = "ansible/elk.yml"
     end
   end
 
   # application vm
-  config.vm.define "app" do |app|
-    app.vm.provider "hyperv" do |h|
-      h.vm_integration_services = {
-        guest_service_interface: true,
-        CustomVMSRV: true
-      }
+  main_config.vm.define "app" do |config|
+    config.vm.provider "libvirt" do |h|
       h.cpus = 2
-      h.maxmemory = 3072
-      h.vmname = "app"
+      h.memory = 3072
+      h.random_hostname = false
+      h.qemu_use_session = false
+      h.nic_model_type = "virtio"
+      h.nic_adapter_count = 1
+      h.machine_arch = "x86_64"
     end
-    app.vm.network "private_network", ip: "192.168.200.11", bridge: "LabInternal"
-    app.vm.synced_folder ".", "/vagrant", disabled: true
 
-    app.vm.provision "ansible" do |ansible|
+    config.vm.network "private_network",
+      libvirt__network_name: "default",
+      type: "dhcp"
+
+    config.vm.provision :hostmanager
+
+    config.vm.hostname = "app.lab.local"
+
+    config.vm.provision "shell" do |sh|
+      sh.inline = <<-EOF
+        sudo dhclient -v || true
+        echo 'nameserver 8.8.8.8' | sudo tee /etc/resolv.conf
+      EOF
+    end
+
+    config.vm.provision "ansible" do |ansible|
       ansible.playbook = "ansible/app.yml"
     end
   end
 
   # client vm
-  config.vm.define "client" do |client|
-    client.vm.provider "hyperv" do |h|
-      h.vm_integration_services = {
-        guest_service_interface: true,
-        CustomVMSRV: true
-      }
+  main_config.vm.define "client" do |config|
+    config.vm.provider "libvirt" do |h|
       h.cpus = 1
-      h.maxmemory = 1024
-      h.vmname = "client"
+      h.memory = 1024
+      h.random_hostname = false
+      h.qemu_use_session = false
+      h.nic_model_type = "virtio"
+      h.nic_adapter_count = 1
+      h.machine_arch = "x86_64"
     end
-    client.vm.network "private_network", ip: "192.168.200.12", bridge: "LabInternal"
-    client.vm.synced_folder ".", "/vagrant", disabled: true
 
-    client.vm.provision "ansible" do |ansible|
+    config.vm.network "private_network",
+      libvirt__network_name: "default",
+      type: "dhcp"
+    
+    config.vm.provision :hostmanager
+
+    config.vm.provision "shell" do |sh|
+      sh.inline = <<-EOF
+        sudo dhclient -v || true
+        echo 'nameserver 8.8.8.8' | sudo tee /etc/resolv.conf
+      EOF
+    end
+
+    config.vm.hostname = "client.lab.local"
+
+    config.vm.provision "ansible" do |ansible|
       ansible.playbook = "ansible/client.yml"
-    end
-end
-
-  # wireshark vm
-  config.vm.define "wireshark" do |wireshark|
-    wireshark.vm.provider "hyperv" do |h|
-      h.vm_integration_services = {
-        guest_service_interface: true,
-        CustomVMSRV: true
-      }
-      h.cpus = 1
-      h.maxmemory = 2048
-      h.vmname = "wireshark"
-    end
-    wireshark.vm.network "private_network", ip: "192.168.200.13", bridge: "LabInternal"
-    wireshark.vm.synced_folder ".", "/vagrant", disabled: true
-
-    wireshark.vm.provision "ansible" do |ansible|
-      ansible.playbook = "ansible/wireshark.yml"
     end
   end
 
-  # Enable provisioning with a shell script. Additional provisioners such as
-  # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
-  # documentation for more information about their specific syntax and use.
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   apt-get update
-  #   apt-get install -y apache2
-  # SHELL
+  # wireshark vm
+  main_config.vm.define "wireshark" do |config|
+    config.vm.provider "libvirt" do |h|
+      h.cpus = 1
+      h.memory = 2048
+      h.random_hostname = false
+      h.qemu_use_session = false
+      h.nic_model_type = "virtio"
+      h.nic_adapter_count = 1
+      h.graphics_type = "spice"
+      h.video_accel3d = true
+      h.machine_arch = "x86_64"
+      # libvirt.xml = <<-EOF
+      #   <graphics type='spice' autoport='yes' listen='none'>
+      #     <gl enable='yes'/>
+      #   </graphics>
+  
+      #   <video>
+      #     <model type='virtio' accel3d='yes' primary='yes'/>
+      #   </video>
+  
+      #   <channel type='spicevmc'>
+      #     <target type='virtio' name='com.redhat.spice.0'/>
+      #   </channel>
+      # EOF
+    end
+    
+    
+
+    config.vm.provision :hostmanager
+
+    config.vm.provision "shell" do |sh|
+      sh.inline = <<-EOF
+        sudo dhclient -v || true
+        echo 'nameserver 8.8.8.8' | sudo tee /etc/resolv.conf
+      EOF
+    end
+
+    config.vm.network "private_network",
+      libvirt__network_name: "default",
+      type: "dhcp"
+
+    config.vm.hostname = "wireshark.lab.local"
+
+    config.vm.provision "ansible" do |ansible|
+      ansible.playbook = "ansible/wireshark.yml"
+    end
+  end
 end
