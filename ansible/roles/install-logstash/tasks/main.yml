@@ -1,0 +1,11 @@
+---
+- name: Install logstash package
+  package:
+    name: logstash
+    state: present
+
+- name: Ensure logstash service is enabled and started
+  service:
+    name: logstash
+    state: started
+    enabled: yes

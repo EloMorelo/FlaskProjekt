@@ -3,6 +3,7 @@
   roles:
     - app
     - nginx
+    - install-logstash
     - role: hostname
       vars:
         hostname: app.lab.local

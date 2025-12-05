@@ -1,6 +1,5 @@
 ---
-
-- name: install elasticsearch prerequisites
+- name: install elasticsearch repo prerequisites
   apt:
     name:
       - apt-transport-https
@@ -25,14 +24,3 @@
   apt:
     update_cache: yes
     cache_valid_time: 3600
-
-- name: install elasticsearch
-  apt:
-    name: elasticsearch
-    state: latest
-
-- name: enable and start elasticsearch service
-  systemd:
-    name: elasticsearch
-    enabled: true
-    state: started

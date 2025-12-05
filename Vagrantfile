@@ -148,6 +148,7 @@ Vagrant.configure("2") do |main_config|
       h.graphics_type = "spice"
       h.video_accel3d = true
       h.machine_arch = "x86_64"
+      
       # libvirt.xml = <<-EOF
       #   <graphics type='spice' autoport='yes' listen='none'>
       #     <gl enable='yes'/>
@@ -163,8 +164,6 @@ Vagrant.configure("2") do |main_config|
       # EOF
     end
     
-    
-
     config.vm.provision :hostmanager
 
     config.vm.provision "shell" do |sh|
