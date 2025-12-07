@@ -26,7 +26,7 @@ sudo usermod -aG libvirt $(whoami)
 # Zainstaluj Vagrant (jeśli nie masz)
 # Pobierz paczkę ze strony Vagrant lub użyj menedżera pakietów (zależnie od dystrybucji)
 
-# Zainstaluj wymagane pluginy Vagrant
+# Zainstaluj wymagane pluginy Vagrant (upewnij się że masz build-essential)
 vagrant plugin install vagrant-libvirt
 vagrant plugin install vagrant-hostmanager
 
