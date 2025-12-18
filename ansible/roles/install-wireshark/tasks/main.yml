@@ -1,0 +1,5 @@
+---
+- name: Install Wireshark package
+  apt:
+    name: wireshark-qt
+    state: present

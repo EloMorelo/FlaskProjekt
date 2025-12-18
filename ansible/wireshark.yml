@@ -2,6 +2,7 @@
   become: yes
   roles:
     - install-xfce
+    - install-wireshark
     - role: hostname
       vars:
         hostname: wireshark.lab.local
