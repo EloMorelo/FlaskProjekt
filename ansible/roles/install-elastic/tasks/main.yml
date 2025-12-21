@@ -1,7 +1,9 @@
 ---
 - name: install elasticsearch
   apt:
-    name: elasticsearch
+    name:
+      - elasticsearch
+      - kibana
     state: latest
 
 - name: enable and start elasticsearch service

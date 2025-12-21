@@ -32,6 +32,8 @@ Notes:
 - Adjust CPU/memory in the provider blocks for each VM as needed.
 =end
 
+enable_https = ENV["ENABLE_HTTPS"] == "1"
+
 Vagrant.configure("2") do |main_config|
   main_config.vm.box = "generic/ubuntu2204"
   main_config.vm.box_version = "4.3.12"
@@ -69,6 +71,12 @@ Vagrant.configure("2") do |main_config|
 
     config.vm.provision "ansible" do |ansible|
       ansible.playbook = "ansible/elk.yml"
+
+      if enable_https
+        ansible.tags = ["enable-https"]
+      else
+        ansible.tags = ["insecure"]
+      end
     end
   end
 
@@ -101,6 +109,12 @@ Vagrant.configure("2") do |main_config|
 
     config.vm.provision "ansible" do |ansible|
       ansible.playbook = "ansible/app.yml"
+
+      if enable_https
+        ansible.tags = ["enable-https"]
+      else
+        ansible.tags = ["insecure"]
+      end
     end
   end
 

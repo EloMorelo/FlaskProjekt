@@ -162,3 +162,16 @@ sudo virsh net-start default || true
 ```
 
 This is a common fix on Fedora when guests cannot reach the Internet while the host firewall is active. If you manage libvirt networks manually, ensure the `libvirt` zone is the one applied to the virtual network interface(s) or adjust the zone accordingly.
+
+
+## Elasticsearch Management
+
+### Resetting the Elasticsearch Password
+
+If you need to reset the password for the `elastic` user in Elasticsearch, you can use the following command:
+
+```bash
+/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic
+```
+
+This command resets the password for the `elastic` user, which is the default superuser in Elasticsearch.
