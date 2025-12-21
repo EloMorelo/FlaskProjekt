@@ -73,9 +73,9 @@ Vagrant.configure("2") do |main_config|
       ansible.playbook = "ansible/elk.yml"
 
       if enable_https
-        ansible.tags = ["enable-https"]
+        ansible.extra_vars = {enable_https: true}
       else
-        ansible.tags = ["insecure"]
+        ansible.extra_vars = {enable_https: false}
       end
     end
   end
@@ -111,9 +111,9 @@ Vagrant.configure("2") do |main_config|
       ansible.playbook = "ansible/app.yml"
 
       if enable_https
-        ansible.tags = ["enable-https"]
+        ansible.extra_vars = {enable_https: true}
       else
-        ansible.tags = ["insecure"]
+        ansible.extra_vars = {enable_https: false}
       end
     end
   end

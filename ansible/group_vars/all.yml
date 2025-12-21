@@ -1,0 +1,2 @@
+ca_dir: /etc/ssl/ca
+cert_dir: /etc/ssl/custom_certs

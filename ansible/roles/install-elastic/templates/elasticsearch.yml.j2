@@ -95,15 +95,24 @@ xpack.security.enrollment.enabled: true
 
 # Enable encryption for HTTP API client connections, such as Kibana, Logstash, and Agents
 xpack.security.http.ssl:
+{% if enable_https %}
   enabled: true
-  keystore.path: certs/http.p12
+  certificate: /etc/elasticsearch/certs/wildcard.crt
+  key: /etc/elasticsearch/certs/wildcard.key
+{% else %}
+  enabled: false
+{% endif %}
 
 # Enable encryption and mutual authentication between cluster nodes
 xpack.security.transport.ssl:
+{% if enable_https %}
   enabled: true
   verification_mode: certificate
-  keystore.path: certs/transport.p12
-  truststore.path: certs/transport.p12
+  certificate: /etc/elasticsearch/certs/wildcard.crt
+  key: /etc/elasticsearch/certs/wildcard.key
+{% else %}
+  enabled: false
+{% endif %}
 # Create a new cluster with the current node only
 # Additional nodes can still join the cluster later
 cluster.initial_master_nodes: ["elasticsearch"]

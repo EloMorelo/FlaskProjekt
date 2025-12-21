@@ -1,0 +1,27 @@
+---
+
+- name: Create directories for certificates
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop:
+    - "{{ ca_dir }}"
+    - "{{ cert_dir }}"
+
+- name: Copy certificates for elasticsearch and kibana
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - { src: 'ca/ca.crt', dest: '{{ ca_dir }}/ca.crt' }
+    - { src: 'ca/ca.key', dest: '{{ ca_dir }}/ca.key' }
+    - { src: 'ca/ca.crt', dest: '/usr/local/share/ca-certificates/lab_ca.crt' }
+    - { src: 'wildcard.crt', dest: '{{ cert_dir }}/wildcard.crt' }
+    - { src: 'wildcard.key', dest: '{{ cert_dir }}/wildcard.key' }
+  notify: update CA certificates

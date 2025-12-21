@@ -1,0 +1,21 @@
+[ req ]
+default_bits       = 4096
+prompt             = no
+default_md         = sha256
+req_extensions     = req_ext
+distinguished_name = dn
+
+[ dn ]
+C  = PL
+O  = Lablocal
+CN = *.lab.local
+
+[ req_ext ]
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = *.lab.local
+DNS.2 = elasticsearch.lab.local
+DNS.3 = kibana.lab.local
+DNS.4 = app.lab.local
+DNS.5 = db.lab.local

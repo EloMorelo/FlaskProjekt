@@ -6,8 +6,34 @@
       - kibana
     state: latest
 
-- name: enable and start elasticsearch service
-  systemd:
-    name: elasticsearch
-    enabled: true
-    state: started
+- name: copy certificate
+  copy:
+    remote_src: yes
+    src: "{{ item }}"
+    dest: "/etc/elasticsearch/certs/{{ item | basename }}"
+    owner: root
+    group: elasticsearch
+    mode: '0660'
+  loop:
+    - "{{ cert_dir }}/wildcard.crt"
+    - "{{ cert_dir }}/wildcard.key"
+
+
+- name: configure elasticsearch
+  template:
+    src: elasticsearch.yml.j2
+    dest: /etc/elasticsearch/elasticsearch.yml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart elasticsearch
+
+- name: configure kibana
+  template: 
+    src: kibana.yml.j2
+    dest: /etc/kibana/kibana.yml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart kibana
+

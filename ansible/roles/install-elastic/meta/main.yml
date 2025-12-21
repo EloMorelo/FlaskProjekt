@@ -1,2 +1,3 @@
 dependencies:
   - { role: add-elastic-repo }
+  - { role: install-certs }
