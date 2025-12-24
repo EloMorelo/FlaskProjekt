@@ -1,4 +1,4 @@
 ---
 
 - name: update CA certificates
-  shell: update-ca-certificates
+  shell: /usr/sbin/update-ca-certificates

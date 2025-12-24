@@ -1,4 +1,8 @@
 ---
+- name: Setting elastic url
+  ansible.builtin.set_fact:
+    elastic_url: '{% if enable_https %}https://elasticsearch.lab.local:9200{% else %}http://localhost:9200{% endif %}'
+
 - name: install elasticsearch
   apt:
     name:
@@ -18,7 +22,6 @@
     - "{{ cert_dir }}/wildcard.crt"
     - "{{ cert_dir }}/wildcard.key"
 
-
 - name: configure elasticsearch
   template:
     src: elasticsearch.yml.j2
@@ -27,6 +30,27 @@
     group: root
     mode: '0644'
   notify: restart elasticsearch
+
+- name: Reset kibana_system password (once)
+  shell: '/usr/share/elasticsearch/bin/elasticsearch-reset-password -u kibana_system -bfs --url {{ elastic_url }}'
+  register: kibana_pw
+  # no_log: true
+  args:
+    creates: /etc/kibana/.kibana_system_password_set
+
+- name: Put password into Kibana keystore
+  shell: |
+    echo "{{ kibana_pw.stdout }}" | /usr/share/kibana/bin/kibana-keystore add -x elasticsearch.password
+  args:
+    executable: /bin/bash
+  no_log: true
+  when: kibana_pw is changed
+
+- name: Save marker file
+  file:
+    path: /etc/kibana/.kibana_system_password_set
+    state: touch
+  when: kibana_pw is changed
 
 - name: configure kibana
   template: 
