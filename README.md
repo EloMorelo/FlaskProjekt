@@ -164,7 +164,7 @@ sudo virsh net-start default || true
 This is a common fix on Fedora when guests cannot reach the Internet while the host firewall is active. If you manage libvirt networks manually, ensure the `libvirt` zone is the one applied to the virtual network interface(s) or adjust the zone accordingly.
 
 
-## Elasticsearch Management
+## Elasticsearch Managementsudo apt-get install nfs-common nfs-kernel-server
 
 ### Resetting the Elasticsearch Password
 
@@ -175,3 +175,21 @@ If you need to reset the password for the `elastic` user in Elasticsearch, you c
 ```
 
 This command resets the password for the `elastic` user, which is the default superuser in Elasticsearch.
+
+## NFS Server Requirement
+
+To enable two-way communication for the synchronized folder, the NFS server must be installed. For Ubuntu/Debian systems, use the following command:
+
+```bash
+sudo apt-get install nfs-common nfs-kernel-server
+```
+
+## Troubleshooting Filebeat Logs in Kibana
+
+If logs are not visible in Kibana after starting Filebeat (via Ansible), perform the following steps:
+
+```bash
+vagrant ssh elasticsearch
+sudo rm -rf /var/lib/filebeat/*
+sudo systemctl restart filebeat
+```

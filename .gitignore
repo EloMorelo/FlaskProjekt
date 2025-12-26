@@ -218,3 +218,7 @@ __marimo__/
 # Ansible
 *.retry
 .vagrant/
+
+
+inventory.ini
+*.pass

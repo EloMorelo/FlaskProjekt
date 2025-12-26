@@ -1,0 +1,30 @@
+---
+- name: Install filebeat package
+  package:
+    name: filebeat
+    state: present
+
+- name: Check if elastic password file exists
+  stat:
+    path: /shared/elastic.pass
+  register: elastic_pass_file
+
+- name: Slurp elastic password file
+  slurp:
+    src: /shared/elastic.pass
+  register: elastic_pass_slurp
+  when: elastic_pass_file.stat.exists
+
+- name: Set elastic password fact
+  set_fact:
+    elastic_password: "{{ elastic_pass_slurp.content | b64decode | trim }}"
+  when: elastic_pass_file.stat.exists
+
+- name: Configure filebeat
+  template:
+    src: filebeat.yml.j2
+    dest: /etc/filebeat/filebeat.yml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart filebeat

@@ -3,7 +3,8 @@
   roles:
     - app
     - nginx
-    - install-logstash
+    - install-filebeat
     - role: hostname
       vars:
         hostname: app.lab.local
+    - role: install-rsyslog

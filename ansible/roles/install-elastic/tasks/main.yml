@@ -38,6 +38,13 @@
   args:
     creates: /etc/kibana/.kibana_system_password_set
 
+- name: Reset elastic password (once)
+  shell: '/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic -bfs --url {{ elastic_url }} > /shared/elastic.pass'
+  register: elastic_pw
+  # no_log: true
+  args:
+    creates: /shared/elastic.pass
+
 - name: Put password into Kibana keystore
   shell: |
     echo "{{ kibana_pw.stdout }}" | /usr/share/kibana/bin/kibana-keystore add -x elasticsearch.password

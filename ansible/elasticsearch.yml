@@ -5,3 +5,5 @@
     - role: hostname
       vars:
         hostname: elasticsearch.lab.local
+    - set-iptables
+    - role: install-filebeat

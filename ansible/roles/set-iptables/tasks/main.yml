@@ -1,0 +1,9 @@
+---
+
+- name: Log ICMP packets
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: icmp
+    jump: LOG
+    log_prefix: "ICMP_PACKET: "
+

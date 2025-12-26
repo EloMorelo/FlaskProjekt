@@ -1,2 +1,5 @@
 ca_dir: /etc/ssl/ca
 cert_dir: /etc/ssl/custom_certs
+
+elastic_port: 9200
+elastic_hostname: elasticsearch.lab.local

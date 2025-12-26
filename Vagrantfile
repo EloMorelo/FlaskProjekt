@@ -56,6 +56,7 @@ Vagrant.configure("2") do |main_config|
 
     config.vm.provision :hostmanager
 
+    config.vm.synced_folder ".", "/shared", type: 'nfs', nfs_udp: false, nfs_version: 4
     config.vm.network "private_network",
       libvirt__network_name: "default",
       type: "dhcp"
@@ -70,7 +71,7 @@ Vagrant.configure("2") do |main_config|
   end
 
     config.vm.provision "ansible" do |ansible|
-      ansible.playbook = "ansible/elk.yml"
+      ansible.playbook = "ansible/elasticsearch.yml"
 
       if enable_https
         ansible.extra_vars = {enable_https: true}
@@ -92,6 +93,7 @@ Vagrant.configure("2") do |main_config|
       h.machine_arch = "x86_64"
     end
 
+    config.vm.synced_folder ".", "/shared", type: 'nfs', nfs_udp: false, nfs_version: 4
     config.vm.network "private_network",
       libvirt__network_name: "default",
       type: "dhcp"
@@ -130,6 +132,7 @@ Vagrant.configure("2") do |main_config|
       h.machine_arch = "x86_64"
     end
 
+    config.vm.synced_folder ".", "/shared", type: 'nfs', nfs_udp: false, nfs_version: 4
     config.vm.network "private_network",
       libvirt__network_name: "default",
       type: "dhcp"
