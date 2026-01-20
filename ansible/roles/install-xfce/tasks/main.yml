@@ -28,7 +28,7 @@
       if [ -r /etc/profile ]; then
         . /etc/profile
       fi
-      exec startxfce4
+      # exec startxfce4
     owner: root
     group: root
     mode: '0755'
