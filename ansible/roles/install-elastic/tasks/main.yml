@@ -31,6 +31,13 @@
     mode: '0644'
   notify: restart elasticsearch
 
+- name: enable and start elasticsearch
+  systemd:
+    name: elasticsearch
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
 - name: Reset kibana_system password (once)
   shell: '/usr/share/elasticsearch/bin/elasticsearch-reset-password -u kibana_system -bfs --url {{ elastic_url }}'
   register: kibana_pw

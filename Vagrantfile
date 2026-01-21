@@ -180,7 +180,7 @@ Vagrant.configure("2") do |main_config|
       #   </channel>
       # EOF
     end
-    
+
     config.vm.provision :hostmanager
 
     config.vm.provision "shell" do |sh|
