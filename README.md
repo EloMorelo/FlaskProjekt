@@ -18,7 +18,7 @@ Instalacja przykładowa (Debian/Ubuntu):
 ```bash
 # Zainstaluj qemu/libvirt i narzędzia
 sudo apt update
-sudo apt install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager
+sudo apt install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager libvirt-dev
 
 # Dodaj użytkownika do grupy libvirt (relokacja sesji po dodaniu)
 sudo usermod -aG libvirt $(whoami)
