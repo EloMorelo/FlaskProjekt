@@ -4,5 +4,4 @@
   apt:
     name: firefox
     state: present
-    update_cache: yes
 

@@ -7,3 +7,4 @@
       vars:
         hostname: wireshark.lab.local
     - role: install-firefox
+    - role: install-hack-tool
