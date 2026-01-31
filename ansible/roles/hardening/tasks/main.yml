@@ -1,0 +1,6 @@
+---
+
+- name: install psad
+  ansible.builtin.apt:
+    name: psad
+    state: present

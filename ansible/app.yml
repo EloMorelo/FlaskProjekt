@@ -7,4 +7,6 @@
     - role: hostname
       vars:
         hostname: app.lab.local
+    - role: hardening
+    - set-iptables
     - role: install-rsyslog

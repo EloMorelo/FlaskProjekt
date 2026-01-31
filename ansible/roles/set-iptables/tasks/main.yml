@@ -7,3 +7,83 @@
     jump: LOG
     log_prefix: "ICMP_PACKET: "
 
+# - name: Log SSH connection attempts
+#   ansible.builtin.iptables:
+#     chain: INPUT
+#     protocol: tcp
+#     destination_port: 22
+#     jump: LOG
+#     log_prefix: "SSH_ATTEMPT: "
+
+- name: Log TCP SYN scan attempts
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    syn: match
+    jump: LOG
+    log_level: 4
+    match: limit
+    limit: "5/min"
+    limit_burst: 10
+    log_prefix: "TCP_SYN_SCAN: "
+
+- name: Log TCP FIN packets (FIN scan)
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    tcp_flags:
+      flags: "FIN,SYN,RST,ACK"
+      flags_set: "FIN"
+    jump: LOG
+    log_prefix: "TCP_FIN "
+    log_level: 4
+    match: limit
+    limit: "5/min"
+    limit_burst: 10
+
+- name: Log TCP NULL packets (NULL scan)
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    tcp_flags:
+      flags: "FIN,SYN,RST,PSH,ACK,URG"
+      flags_set: "NONE"
+    jump: LOG
+    log_prefix: "TCP_NULL "
+    log_level: 4
+    match: limit
+    limit: "5/min"
+    limit_burst: 10
+
+- name: Log TCP XMAS packets (XMAS scan)
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    tcp_flags:
+      flags: "FIN,PSH,URG"
+      flags_set: "FIN,PSH,URG"
+    jump: LOG
+    log_prefix: "TCP_XMAS "
+    log_level: 4
+    match: limit
+    limit: "5/min"
+    limit_burst: 10
+
+- name: Log UDP packets (UDP scan)
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: udp
+    jump: LOG
+    log_prefix: "UDP "
+    log_level: 4
+    match: limit
+    limit: "5/min"
+    limit_burst: 10
+
+- name: Enable logging for psad
+  ansible.builtin.lineinfile:
+    path: /etc/rsyslog.conf
+    line: 'kern.info |/var/lib/psad/psadfifo'
+    create: yes
+  notify: restart rsyslog
+
