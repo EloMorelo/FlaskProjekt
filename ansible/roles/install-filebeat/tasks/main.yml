@@ -20,6 +20,16 @@
     elastic_password: "{{ elastic_pass_slurp.content | b64decode | trim }}"
   when: elastic_pass_file.stat.exists
 
+- name: Check if nginx logs exist
+  stat:
+    path: /var/log/nginx/access.log
+  register: nginx_logs
+
+- name: Check if app logs exist
+  stat:
+    path: /var/log/app/app.log
+  register: app_logs
+
 - name: Configure filebeat
   template:
     src: filebeat.yml.j2

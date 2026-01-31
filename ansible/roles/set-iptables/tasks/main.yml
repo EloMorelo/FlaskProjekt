@@ -7,14 +7,6 @@
     jump: LOG
     log_prefix: "ICMP_PACKET: "
 
-# - name: Log SSH connection attempts
-#   ansible.builtin.iptables:
-#     chain: INPUT
-#     protocol: tcp
-#     destination_port: 22
-#     jump: LOG
-#     log_prefix: "SSH_ATTEMPT: "
-
 - name: Log TCP SYN scan attempts
   ansible.builtin.iptables:
     chain: INPUT
@@ -79,6 +71,53 @@
     match: limit
     limit: "5/min"
     limit_burst: 10
+
+- name: Log SSH brute-force attempts
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: 22
+    jump: LOG
+    log_prefix: "SSH_ATTEMPT "
+    log_level: 4
+    match: limit
+    limit: "3/min"
+    limit_burst: 5
+
+- name: Log HTTP brute-force / login attempts
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: 80
+    jump: LOG
+    log_prefix: "HTTP_LOGIN "
+    log_level: 4
+    match: limit
+    limit: "10/min"
+    limit_burst: 20
+
+- name: Log dropped packets
+  ansible.builtin.iptables:
+    chain: INPUT
+    jump: LOG
+    log_prefix: "FW_DROP "
+    log_level: 4
+
+- name: Log TCP connection flood
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    jump: LOG
+    log_prefix: "TCP_FLOOD "
+    log_level: 4
+    match: limit
+    limit: "50/min"
+    limit_burst: 100
+
+- name: Ensure kernel logs are sent to rsyslog
+  ansible.builtin.lineinfile:
+    path: /etc/rsyslog.conf
+    line: 'kern.*    /var/log/firewall.log'
 
 - name: Enable logging for psad
   ansible.builtin.lineinfile:

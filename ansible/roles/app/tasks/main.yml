@@ -18,3 +18,66 @@
     executable: pip3
     state: present
 
+- name: Create directory for flask app logs
+  file:
+    path: /var/log/app
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: Create directory for flask app
+  file:
+    path: /opt/flask_app
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: Copy Flask application files
+  copy:
+    src: "{{ item }}"
+    dest: /opt/flask_app/{{ item }}
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  with_items:
+    - main.py
+    - inialize_db.py
+
+- name: Create directory for flask app templates
+  file:
+    path: /opt/flask_app/templates
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: Copy Flask application template files
+  copy:
+    src: files/{{ item }}
+    dest: /opt/flask_app/templates/{{ item }}
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  with_items:
+    - login.html
+    - dashboard.html
+
+- name: Initialize the Flask application database
+  shell: python3 /opt/flask_app/inialize_db.py
+  args:
+    chdir: /opt/flask_app
+
+- name: Deploy systemd service for Flask app
+  ansible.builtin.template:
+    src: flask_app.service.conf
+    dest: /etc/systemd/system/flask_app.service
+    mode: '0644'
+  notify: reload systemd
+
+- name: Start Flask app service
+  ansible.builtin.systemd:
+    name: flask_app
+    enabled: yes
+    state: restarted

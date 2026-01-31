@@ -6,3 +6,4 @@
     - role: hostname
       vars:
         hostname: wireshark.lab.local
+    - role: install-firefox

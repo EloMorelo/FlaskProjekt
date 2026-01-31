@@ -30,6 +30,18 @@ filebeat.inputs:
   # Paths that should be crawled and fetched. Glob based paths.
   paths:
     - /var/log/*.log
+    - /var/log/firewall.log
+
+{% if nginx_logs.stat.exists and app_logs.stat.exists %}
+filebeat.inputs:
+  - type: filestream
+    id: flask-app-logs-with-nginx
+    enabled: true
+    paths:
+      - /var/log/nginx/access.log
+      - /var/log/nginx/error.log
+      - /var/log/app/*.log
+{% endif %}
 
   # Exclude lines. A list of regular expressions to match. It drops the lines that are
   # matching any regular expression from the list.
@@ -94,7 +106,6 @@ setup.template.settings:
   index.number_of_shards: 1
   #index.codec: best_compression
   #_source.enabled: false
-
 
 # ================================== General ===================================
 

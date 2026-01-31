@@ -34,9 +34,10 @@ def add_user(username: str, password: str):
     password_hash = hash_password(password)
 
     try:
-        cursor.execute("""
-        INSERT INTO users (username, password_hash) VALUES(?, ?)
-                       """,(username, password_hash))
+        cursor.execute(
+            """
+            INSERT INTO users (username, password_hash) VALUES(?, ?)
+            """, (username, password_hash))
         conn.commit()
         print(f"Added user: {username}")
     except sqlite3.IntegrityError:

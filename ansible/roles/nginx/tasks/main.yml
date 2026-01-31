@@ -7,6 +7,23 @@
     state: present
     update_cache: yes
 
+- name: Deploy nginx config
+  ansible.builtin.template:
+    src: app.conf.j2
+    dest: /etc/nginx/sites-available/app.conf
+  notify: reload nginx
+
+- name: Enable site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/app.conf
+    dest: /etc/nginx/sites-enabled/app.conf
+    state: link
+
+- name: Remove default site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
 - name: Ensure nginx is enabled and started
   become: true
   service:

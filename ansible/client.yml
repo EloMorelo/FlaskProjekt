@@ -5,3 +5,4 @@
     - role: hostname
       vars:
         hostname: client.lab.local
+    - role: install-firefox
