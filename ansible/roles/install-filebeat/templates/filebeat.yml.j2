@@ -157,7 +157,12 @@ setup.kibana:
 # ---------------------------- Elasticsearch Output ----------------------------
 output.elasticsearch:
   # Array of hosts to connect to.
-  hosts: ["{{ elastic_hostname }}:{{ elastic_port }}"]
+
+{% if enable_https %}
+  hosts: ["https://elasticsearch.lab.local:9200"]
+{% else %}
+  hosts: ["http://elasticsearch.lab.local:9200"]
+{% endif %}
 
   # Performance preset - one of "balanced", "throughput", "scale",
   # "latency", or "custom".
