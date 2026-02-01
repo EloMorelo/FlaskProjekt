@@ -33,14 +33,13 @@ filebeat.inputs:
     - /var/log/firewall.log
 
 {% if nginx_logs.stat.exists and app_logs.stat.exists %}
-filebeat.inputs:
-  - type: filestream
-    id: flask-app-logs-with-nginx
-    enabled: true
-    paths:
-      - /var/log/nginx/access.log
-      - /var/log/nginx/error.log
-      - /var/log/app/*.log
+- type: filestream
+  id: flask-app-logs-with-nginx
+  enabled: true
+  paths:
+    - /var/log/nginx/access.log
+    - /var/log/nginx/error.log
+    - /var/log/app/*.log
 {% endif %}
 
   # Exclude lines. A list of regular expressions to match. It drops the lines that are
